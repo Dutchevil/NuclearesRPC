@@ -1,0 +1,8 @@
+# Ignore Python venvs
+.venv/
+venv/
+
+# Ignore build files
+build/
+dist/
+nuclearesrpc.spec
