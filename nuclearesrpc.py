@@ -47,7 +47,7 @@ def find_nucleares():
 if len(sys.argv) > 1:
     if sys.argv[1].endswith("Nucleares.exe"):
         # Client is launching through steam, we are expected to launch it on Steam's behalf
-        game_exec = subprocess.run(sys.argv[1])
+        game_exec = subprocess.Popen(sys.argv[1])
 
 
 cid = 1331101603649818786
