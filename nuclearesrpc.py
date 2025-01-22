@@ -8,7 +8,7 @@ import subprocess
 
 def get_all_vars(srv_url: str):
     """
-
+    Request a list of dvars from the webserver
     :param srv_url: URL to the webserver, typically localhost:8785
     :return:
     """
@@ -58,6 +58,8 @@ while proc is None:
     proc = find_nucleares()
     time.sleep(5)
 print("Found: " + str(proc.pid))
+starttime = time.time()
+
 
 print("Looking for webserver...")
 port = "8785"
@@ -69,11 +71,11 @@ while 1:
         break
     except requests.ConnectionError as e:
         time.sleep(5)
+print("Webserver is live, firing up RPC...")
 
 
-starttime = time.time()
 presence.connect()
-print("Ctrl+C to Exit...")
+print("Connected. Press Ctrl+C to Exit")
 while 1:
     dvars = get_all_vars(url)
     if dvars["CORE_TEMP"] <= 50:
@@ -93,7 +95,7 @@ while 1:
         details=details,
         state=status,
     )
-    print(
-        f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}"
-    )
+    #print(
+    #    f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}"
+    #)
     time.sleep(15)
