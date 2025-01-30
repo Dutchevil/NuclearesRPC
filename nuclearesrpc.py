@@ -6,37 +6,37 @@ import pypresence
 import subprocess
 
 
+VARIABLE_TYPES = {
+    "CORE_TEMP": float,
+    "GENERATOR_0_KW": float,
+    "GENERATOR_1_KW": float,
+    "GENERATOR_2_KW": float,
+    "CORE_IMMINENT_FUSION": str
+}
+
+
 def get_all_vars(srv_url: str):
     """
     Request a list of dvars from the webserver
     :param srv_url: URL to the webserver, typically localhost:8785
-    :return:
+    :return: A dictionary of cast variables and their names
     """
-    var = [
-        "CORE_TEMP",
-        "GENERATOR_0_KW",
-        "GENERATOR_1_KW",
-        "GENERATOR_2_KW",
-        "CORE_IMMINENT_FUSION"
-    ]
     results = {}
-    for s in var:
+    for key, typeof in VARIABLE_TYPES.items():
         res = requests.get(
             srv_url,
             {
-                "Variable": s
+                "Variable": key
             }
         )
-        if s == "CORE_IMMINENT_FUSION":
-            results[s] = res.text
-            continue
-        results[s] = float(res.text)
+        results[key] = typeof(res.text)
     return results
 
 
 def find_nucleares():
     """
     Find the running Nucleares.exe process, if it exists
+    :return: A psutil Process representing Nucleares
     """
     for process in psutil.process_iter():
         if process.name() == "Nucleares.exe":
@@ -105,7 +105,7 @@ while 1:
         print("Webserver connection lost, trying to re-establish...")
         if find_nucleares() is None:
             print("Nucleares is closed, RPC will close...")
-            exit(0)
+            sys.exit(0)
         while 1:
             try:
                 # Try to query data until it succeeds
