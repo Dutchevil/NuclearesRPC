@@ -107,10 +107,10 @@ while 1:
             state=status,
             large_image="nucleares"
         )
-        print(
-            f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}",
-            f"- Rods: {dvars['RODS_POS_ORDERED']}"
-        )
+        #print(
+        #    f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}",
+        #    f"- Rods: {dvars['RODS_POS_ORDERED']}"
+        #)
         time.sleep(15)
     except requests.ConnectionError:
         print("Webserver connection lost, trying to re-establish...")
