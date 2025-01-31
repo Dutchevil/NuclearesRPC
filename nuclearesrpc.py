@@ -78,6 +78,7 @@ while 1:
 print("Webserver is live, firing up RPC...")
 
 
+mission = False
 presence.connect()
 print("Connected. Press Ctrl+C to Exit")
 while 1:
@@ -94,8 +95,9 @@ while 1:
             status = "Generator Offline"
         if dvars["CORE_IMMINENT_FUSION"] == "TRUE":
             details = "Imminent Meltdown"
-        if dvars["CORE_TEMP"] == 20 and dvars["RODS_POS_ORDERED"] == 87.5:
+        if (dvars["CORE_TEMP"] == 20 and dvars["RODS_POS_ORDERED"] == 87.5) or mission:
             # I can give you my complete assurance that my work will be back to normal~
+            mission = True
             details = "This mission is too important"
             status = "The intruder must be dealt with"
         presence.update(
