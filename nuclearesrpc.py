@@ -4,6 +4,7 @@ import sys
 import requests
 import pypresence
 import subprocess
+from typing import Dict
 
 
 VARIABLE_TYPES = {
@@ -11,15 +12,17 @@ VARIABLE_TYPES = {
     "GENERATOR_0_KW": float,
     "GENERATOR_1_KW": float,
     "GENERATOR_2_KW": float,
-    "CORE_IMMINENT_FUSION": str
+    "CORE_IMMINENT_FUSION": str,
+    "RODS_POS_ORDERED": float
 }
 
 
-def get_all_vars(srv_url: str):
+def get_all_vars(srv_url: str) -> Dict[str, float | str]:
     """
     Request a list of dvars from the webserver
     :param srv_url: URL to the webserver, typically localhost:8785
     :return: A dictionary of cast variables and their names
+    :rtype: Dict[str, float | str]
     """
     results = {}
     for key, typeof in VARIABLE_TYPES.items():
@@ -33,9 +36,10 @@ def get_all_vars(srv_url: str):
     return results
 
 
-def find_nucleares():
+def find_nucleares() -> psutil.Process | None:
     """
     Find the running Nucleares.exe process, if it exists
+    :rtype: psutil.Process
     :return: A psutil Process representing Nucleares
     """
     for process in psutil.process_iter():
@@ -90,6 +94,10 @@ while 1:
             status = "Generator Offline"
         if dvars["CORE_IMMINENT_FUSION"] == "TRUE":
             details = "Imminent Meltdown"
+        if dvars["CORE_TEMP"] == 20 and dvars["RODS_POS_ORDERED"] == 87.5:
+            # I can give you my complete assurance that my work will be back to normal~
+            details = "This mission is too important"
+            status = "The intruder must be dealt with"
         presence.update(
             pid=proc.pid,
             start=round(starttime),
@@ -97,14 +105,16 @@ while 1:
             state=status,
             large_image="nucleares"
         )
-        #print(
-        #    f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}"
-        #)
+        print(
+            f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}",
+            f"- Rods: {dvars['RODS_POS_ORDERED']}"
+        )
         time.sleep(15)
     except requests.ConnectionError:
         print("Webserver connection lost, trying to re-establish...")
         if find_nucleares() is None:
             print("Nucleares is closed, RPC will close...")
+            presence.close()
             sys.exit(0)
         while 1:
             try:
