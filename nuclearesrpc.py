@@ -5,6 +5,7 @@ import requests
 import pypresence
 import subprocess
 from typing import Dict
+import ctypes
 
 
 VARIABLE_TYPES = {
@@ -13,7 +14,7 @@ VARIABLE_TYPES = {
     "GENERATOR_1_KW": float,
     "GENERATOR_2_KW": float,
     "CORE_IMMINENT_FUSION": str,
-    "RODS_POS_ORDERED": float
+#    "RODS_POS_ORDERED": float
 }
 
 
@@ -26,13 +27,17 @@ def get_all_vars(srv_url: str) -> Dict[str, float | str]:
     """
     results = {}
     for key, typeof in VARIABLE_TYPES.items():
+        print(f"Getting key {key}, looking for type {typeof}")
         res = requests.get(
             srv_url,
             {
                 "Variable": key
             }
         )
-        results[key] = typeof(res.text)
+        try:
+            results[key] = typeof(res.text)
+        except ValueError:
+            print(f"Conversion of '{res.text}' to type {typeof} failed")
     return results
 
 
@@ -54,6 +59,7 @@ if len(sys.argv) > 1:
         game_exec = subprocess.Popen(sys.argv[1])
 
 
+ctypes.windll.user32.MessageBoxW(0, "Remember to turn on the WebServer, else NuclearesRPC will not work!", "Reminder!", 64)
 cid = 1331101603649818786
 presence = pypresence.Presence(cid, pipe=0)
 print("Locating running Nucleares executable...")
@@ -95,11 +101,11 @@ while 1:
             status = "Generator Offline"
         if dvars["CORE_IMMINENT_FUSION"] == "TRUE":
             details = "Imminent Meltdown"
-        if (dvars["CORE_TEMP"] == 20 and dvars["RODS_POS_ORDERED"] == 87.5) or mission:
-            # I can give you my complete assurance that my work will be back to normal~
-            mission = True
-            details = "This mission is too important"
-            status = "The intruder must be dealt with"
+        #if (dvars["CORE_TEMP"] == 20 and dvars["RODS_POS_ORDERED"] == 87.5) or mission:
+        #    # I can give you my complete assurance that my work will be back to normal~
+        #    mission = True
+        #    details = "This mission is too important"
+        #    status = "The intruder must be dealt with"
         presence.update(
             pid=proc.pid,
             start=round(starttime),
