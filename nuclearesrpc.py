@@ -4,8 +4,34 @@ import sys
 import requests
 import pypresence
 import subprocess
-from typing import Dict
+import argparse
+import logging
+import traceback
 import ctypes
+from typing import Dict
+
+
+__version__ = "v2.0.0"
+parser = argparse.ArgumentParser(
+    prog="Nucleares Presence Client",
+    description="Nucleares Rich Presence Client for Discord",
+    epilog=f"Version {__version__}"
+)
+parser.add_argument("-v", "--version", action="store_true")
+parser.add_argument("-d", "--debug", action="store_true")
+params = parser.parse_args()
+logging.basicConfig(
+    level="DEBUG" if params.debug else "INFO",
+    filename="debug.log" if params.debug else None
+)
+
+
+if params.version:
+    print("Nucleares Rich Presence Client")
+    print(f"Client Version: {__version__}")
+    print(f"PyPresence Version: {pypresence.__version__}")
+    input("Press Enter to exit...")
+    sys.exit(0)
 
 
 VARIABLE_TYPES = {
@@ -27,7 +53,7 @@ def get_all_vars(srv_url: str) -> Dict[str, float | str]:
     """
     results = {}
     for key, typeof in VARIABLE_TYPES.items():
-        print(f"Getting key {key}, looking for type {typeof}")
+        logging.debug(f"Getting key {key}, looking for type {typeof}")
         res = requests.get(
             srv_url,
             {
@@ -37,7 +63,7 @@ def get_all_vars(srv_url: str) -> Dict[str, float | str]:
         try:
             results[key] = typeof(res.text)
         except ValueError:
-            print(f"Conversion of '{res.text}' to type {typeof} failed")
+            logging.error(f"Conversion of '{res.text}' to type {typeof} failed")
     return results
 
 
@@ -54,24 +80,24 @@ def find_nucleares() -> psutil.Process | None:
 
 
 if len(sys.argv) > 1:
-    if sys.argv[1].endswith("Nucleares.exe"):
-        # Client is launching through steam, we are expected to launch it on Steam's behalf
-        game_exec = subprocess.Popen(sys.argv[1])
-
+    for obj in sys.argv:
+        if obj.endswith("Nucleares.exe"):
+            # Client is launching through steam, we are expected to launch it on Steam's behalf
+            game_exec = subprocess.Popen(obj)
 
 ctypes.windll.user32.MessageBoxW(0, "Remember to turn on the WebServer, else NuclearesRPC will not work!", "Reminder!", 64)
 cid = 1331101603649818786
 presence = pypresence.Presence(cid, pipe=0)
-print("Locating running Nucleares executable...")
+logging.info("Locating running Nucleares executable...")
 proc = find_nucleares()
 while proc is None:
     proc = find_nucleares()
     time.sleep(5)
-print("Found: " + str(proc.pid))
+logging.debug("Found: " + str(proc.pid))
 starttime = time.time()
 
 
-print("Looking for webserver...")
+logging.info("Waiting for webserver...")
 port = "8785"
 url = "http://localhost:" + port + "/"
 while 1:
@@ -81,12 +107,12 @@ while 1:
         break
     except requests.ConnectionError as e:
         time.sleep(5)
-print("Webserver is live, firing up RPC...")
+logging.info("Webserver is live, firing up RPC...")
 
 
 mission = False
 presence.connect()
-print("Connected. Press Ctrl+C to Exit")
+logging.info("Connected. Press Ctrl+C to Exit")
 while 1:
     try:
         dvars = get_all_vars(url)
@@ -113,15 +139,16 @@ while 1:
             state=status,
             large_image="nucleares"
         )
-        #print(
-        #    f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}",
+        logging.debug(
+            f"Sent Update: Core = {dvars['CORE_TEMP']} - Total Pwr = {pwr} - Panic = {dvars['CORE_IMMINENT_FUSION']}",
         #    f"- Rods: {dvars['RODS_POS_ORDERED']}"
-        #)
+        )
         time.sleep(15)
+        raise Exception("Raising test exception")
     except requests.ConnectionError:
-        print("Webserver connection lost, trying to re-establish...")
+        logging.warning("Webserver connection lost, trying to re-establish...")
         if find_nucleares() is None:
-            print("Nucleares is closed, RPC will close...")
+            logging.info("Nucleares is closed, RPC will close...")
             presence.close()
             sys.exit(0)
         while 1:
@@ -131,5 +158,13 @@ while 1:
                 break
             except requests.ConnectionError as e:
                 time.sleep(5)
-            print("Connected!")
+            logging.info("Connected!")
             continue
+
+    except Exception as e:
+        logging.critical("Client has run into an unexpected error and cannot continue")
+        logging.critical("NuclearesRPC has crashed.", exc_info=e)
+        logging.critical("Please send this error when asking for support")
+        presence.close()
+        input("Press Enter to exit...")
+        sys.exit(1)

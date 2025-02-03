@@ -6,3 +6,6 @@ venv/
 build/
 dist/
 nuclearesrpc.spec
+
+# Ignore log files
+*.log
