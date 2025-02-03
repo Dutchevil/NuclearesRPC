@@ -144,7 +144,6 @@ while 1:
         #    f"- Rods: {dvars['RODS_POS_ORDERED']}"
         )
         time.sleep(15)
-        raise Exception("Raising test exception")
     except requests.ConnectionError:
         logging.warning("Webserver connection lost, trying to re-establish...")
         if find_nucleares() is None:
