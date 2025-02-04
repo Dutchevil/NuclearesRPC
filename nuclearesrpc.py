@@ -62,7 +62,8 @@ def get_all_vars(srv_url: str) -> Dict[str, float | str]:
             }
         )
         try:
-            results[key] = typeof(res.text)
+            hotfix = res.text.replace(",", ".")
+            results[key] = typeof(hotfix)
         except ValueError:
             logging.error(f"Conversion of '{res.text}' to type {typeof} failed")
     return results
