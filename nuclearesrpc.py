@@ -121,10 +121,12 @@ while 1:
         if dvars["CORE_TEMP"] <= 50:
             details = "Reactor Offline"
         else:
-            details = f"Reactor Online: {round(dvars['CORE_TEMP'])}C"
+            details = f"Reactor Online: {round(dvars['CORE_TEMP'])}\u00B0C"
         pwr = round(dvars["GENERATOR_0_KW"] + dvars["GENERATOR_1_KW"] + dvars["GENERATOR_2_KW"])
-        if pwr > 0:
+        if 0 < pwr < 1000:
             status = f"Producing {pwr} kW"
+        elif pwr > 1000:
+            status = f"Producing {round(pwr/1000)} mW"
         else:
             status = "Generator Offline"
         if dvars["CORE_IMMINENT_FUSION"] == "TRUE":
