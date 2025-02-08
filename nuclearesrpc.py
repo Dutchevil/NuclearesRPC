@@ -123,9 +123,9 @@ while 1:
         else:
             details = f"Reactor Online: {round(dvars['CORE_TEMP'])}\u00B0C"
         pwr = round(dvars["GENERATOR_0_KW"] + dvars["GENERATOR_1_KW"] + dvars["GENERATOR_2_KW"])
-        if 0 < pwr < 1000:
+        if 0 < pwr < 10000:
             status = f"Producing {pwr} kW"
-        elif pwr > 1000:
+        elif pwr > 10000:
             status = f"Producing {round(pwr/1000)} mW"
         else:
             status = "Generator Offline"
