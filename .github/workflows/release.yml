@@ -1,0 +1,15 @@
+on:
+  push:
+    branches: [ $default-branch ]
+jobs:
+  make-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: PyInstaller Action
+        uses: Martin005/pyinstaller-action@v1.2.0
+        with:
+          spec: nuclearesrpc.py
+          requirements: requirements.txt
+          python_ver: 3.13
+          upload_exe_with_name: nuclearesrpc.exe
