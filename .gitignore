@@ -9,3 +9,6 @@ nuclearesrpc.spec
 
 # Ignore log files
 *.log
+
+# Ignore IDE files
+.idea

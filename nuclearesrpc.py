@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument("-v", "--version", action="store_true")
 parser.add_argument("-d", "--debug", action="store_true")
-params = parser.parse_args()
+params, _ = parser.parse_known_args()
 logging.basicConfig(
     level="DEBUG" if params.debug else "INFO",
     filename="debug.log" if params.debug else None
