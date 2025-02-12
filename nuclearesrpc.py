@@ -126,7 +126,7 @@ while 1:
         if 0 < pwr < 10000:
             status = f"Producing {pwr} kW"
         elif pwr > 10000:
-            status = f"Producing {round(pwr/1000)} mW"
+            status = f"Producing {round(pwr/1000)} MW"
         else:
             status = "Generator Offline"
         if dvars["CORE_IMMINENT_FUSION"] == "TRUE":
