@@ -1,0 +1,35 @@
+name: Build EXE on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-exe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build EXE with PyInstaller
+        # --onefile makes a single exe; replace `nuclearesrpc.py` with your entry-point
+        run: pyinstaller --onefile nuclearesrpc.py
+
+      - name: Publish EXE to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/nuclearesrpc*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
